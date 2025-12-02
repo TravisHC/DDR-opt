@@ -126,7 +126,6 @@ private:
     int TrajNum;
     // if the traj is cutted
     bool ifCutTraj_;
-    int unOccupied_traj_num_;
 
     std::vector<Eigen::Vector3d> inner_init_positions;
 

@@ -215,12 +215,10 @@ bool MSPlanner::minco_plan(const FlatTrajData &flat_traj){
 bool MSPlanner::get_state(const FlatTrajData &flat_traj){
     ifCutTraj_ = flat_traj.if_cut;
 
-    unOccupied_traj_num_ = -1;
-
     TrajNum = flat_traj.UnOccupied_traj_pts.size()+1;
 
     Innerpoints.resize(2,TrajNum-1);
-    for(int i=0; i<flat_traj.UnOccupied_traj_pts.size(); i++){
+    for(u_int i=0; i<flat_traj.UnOccupied_traj_pts.size(); i++){
         Innerpoints.col(i) = flat_traj.UnOccupied_traj_pts[i].head(2);
     }
 
@@ -685,7 +683,6 @@ double MSPlanner::costFunctionCallback(void *ptr,
 }
 
 void MSPlanner::attachPenaltyFunctional(double &cost){
-    double start_time = ros::Time::now().toSec();
     collision_point.clear();
     double ini_x = iniStateXYTheta.x();
     double ini_y = iniStateXYTheta.y();
@@ -984,19 +981,17 @@ void MSPlanner::attachPenaltyFunctional(double &cost){
         }
 
         // segment duration balance
-        if(i < unOccupied_traj_num_){
-            if( pieceTime[i] < unoccupied_averageT * mean_time_lowBound_){
-                cost += penaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_);
-                cost_meanT += penaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_);
-                partialGradByTimes.array() += penaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_)  * (- mean_time_lowBound_ / TrajNum);
-                partialGradByTimes(i) += penaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_);
-            }
-            if (pieceTime[i] > unoccupied_averageT * mean_time_uppBound_){
-                cost += penaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_);
-                cost_meanT += penaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_);
-                partialGradByTimes.array() += penaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_) * (-mean_time_uppBound_ / TrajNum);
-                partialGradByTimes(i) += penaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_);
-            }
+        if( pieceTime[i] < unoccupied_averageT * mean_time_lowBound_){
+            cost += penaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_);
+            cost_meanT += penaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_);
+            partialGradByTimes.array() += penaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_)  * (- mean_time_lowBound_ / TrajNum);
+            partialGradByTimes(i) += penaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_);
+        }
+        if (pieceTime[i] > unoccupied_averageT * mean_time_uppBound_){
+            cost += penaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_);
+            cost_meanT += penaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_);
+            partialGradByTimes.array() += penaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_) * (-mean_time_uppBound_ / TrajNum);
+            partialGradByTimes(i) += penaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_);
         }
 
         VecIntegralX.push_back(IntegralX);
@@ -1536,19 +1531,17 @@ void MSPlanner::attachPenaltyFunctionalPath(double &cost){
         VecSingleYGradCTheta[i] = SingleYGradCTheta * CoeffIntegral;
         VecSingleYGradT[i] = SingleYGradT;
 
-        if(i < unOccupied_traj_num_){
-            if( pieceTime[i] < unoccupied_averageT * mean_time_lowBound_){
-                cost += PathpenaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_);
-                cost_meanT += PathpenaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_);
-                partialGradByTimes.array() += PathpenaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_)  * (- mean_time_lowBound_ / TrajNum);
-                partialGradByTimes(i) += PathpenaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_);
-            }
-            if (pieceTime[i] > unoccupied_averageT * mean_time_uppBound_){
-                cost += PathpenaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_);
-                cost_meanT += PathpenaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_);
-                partialGradByTimes.array() += PathpenaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_)  * (- mean_time_uppBound_ / TrajNum);
-                partialGradByTimes(i) += PathpenaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_);
-            }
+        if( pieceTime[i] < unoccupied_averageT * mean_time_lowBound_){
+            cost += PathpenaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_);
+            cost_meanT += PathpenaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_);
+            partialGradByTimes.array() += PathpenaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_)  * (- mean_time_lowBound_ / TrajNum);
+            partialGradByTimes(i) += PathpenaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_lowBound_);
+        }
+        if (pieceTime[i] > unoccupied_averageT * mean_time_uppBound_){
+            cost += PathpenaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_);
+            cost_meanT += PathpenaltyWt.mean_time_weight * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_) * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_);
+            partialGradByTimes.array() += PathpenaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_)  * (- mean_time_uppBound_ / TrajNum);
+            partialGradByTimes(i) += PathpenaltyWt.mean_time_weight * 2.0 * (pieceTime[i] - unoccupied_averageT * mean_time_uppBound_);
         }
 
         // Path point constraint
@@ -1676,22 +1669,6 @@ void MSPlanner::mincoPathPub(const Trajectory<5, 2> &final_traj, const Eigen::Ve
             pose.pose.orientation = tf::createQuaternionMsgFromYaw(VecYaw[i][j]);
             path.poses.push_back(pose);
             // outFile2 << pos.x() << " " << pos.y() << std::endl;
-        }
-        if(i == unOccupied_traj_num_-1){
-            Eigen::Vector2d cur_pos = pos;
-            std::vector<Eigen::Vector2i> inputs; 
-            inputs.emplace_back(1,1); inputs.emplace_back(-1,-1); inputs.emplace_back(0,0);
-            inputs.emplace_back(1,-1); inputs.emplace_back(-1,1); inputs.emplace_back(0,0);
-            for(auto pt:inputs){
-                geometry_msgs::PoseStamped pose;
-                pose.header.frame_id = "world";
-                pose.header.stamp = ros::Time::now();
-                pose.pose.position.x = cur_pos.x() + pt.x() * 0.05;
-                pose.pose.position.y = cur_pos.y() + pt.y() * 0.05;
-                pose.pose.position.z = 0.15;
-                pose.pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
-                path.poses.push_back(pose);
-            }
         }
     }
     publisher.publish(path);

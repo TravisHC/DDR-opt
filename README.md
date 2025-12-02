@@ -54,6 +54,10 @@ roslaunch plan_manager planner_sim.launch # for robots controlled by linear and 
 You can use `2D Nav Goal` to set goal point.  
 
 ## Update
+25-12-02
+1. Fixed the bug reported in [Issue 16](https://github.com/ZJU-FAST-Lab/DDR-opt/issues/16). Thanks to JMang0321 for the report!
+
+
 25-07-25  
 1. Enhanced the 'if_directly_constrain_v_omega' feature. Users can now select between: 1) Constraining linear (v) and angular (omega) velocities independently, or 2) Constraining the product (v * omega) considering wheel speed limits.
 2. Reduced the number of ROS messages in the code that do not use topic remapping. 

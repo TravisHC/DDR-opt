@@ -34,7 +34,7 @@ lbfgs_params:
   past:                     3
   g_epsilon:                0.0
   min_step:                 1.0e-32
-  delta:                    5.0e-4
+  delta:                    5.0e-3
   max_iterations:           8000
 
 # Mean time constraint range
